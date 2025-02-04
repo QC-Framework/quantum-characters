@@ -6,35 +6,7 @@ import {
 } from '../../actions/types';
 
 export const initialState = {
-	spawns:
-		process.env.NODE_ENV == 'production'
-			? []
-			: [
-					{
-						id: 0,
-						icon: 'location-dot',
-						label: 'Last Location',
-						location: { x: 0, y: 0, z: 0, h: 0 },
-					},
-					{
-						id: 1,
-						icon: 'building',
-						label: 'Test Location 1',
-						location: { x: 0, y: 0, z: 0, h: 0 },
-					},
-					{
-						id: 2,
-						icon: 'house',
-						label: 'Test Location 2',
-						location: { x: 0, y: 0, z: 0, h: 0 },
-					},
-					{
-						id: 2,
-						icon: 'car',
-						label: 'Test Location 2',
-						location: { x: 0, y: 0, z: 0, h: 0 },
-					},
-			  ],
+	spawns: Array(),
 	selected: null,
 };
 

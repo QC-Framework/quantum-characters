@@ -1,12 +1,7 @@
 import '@babel/polyfill';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-	CssBaseline,
-	ThemeProvider,
-	createTheme,
-	StyledEngineProvider,
-} from '@mui/material';
+import { CssBaseline, ThemeProvider, createTheme, StyledEngineProvider } from '@mui/material';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -28,13 +23,13 @@ export default () => {
 
 	const muiTheme = createTheme({
 		typography: {
-			fontFamily: ['Source Sans Pro'],
+			fontFamily: ['Oswald'],
 		},
 		palette: {
 			primary: {
-				main: '#03E6A9',
-				light: '#33EA88',
-				dark: '#0B6F55',
+				main: '#01848B',
+				light: '#00F8FC',
+				dark: '#005953',
 				contrastText: '#ffffff',
 			},
 			secondary: {
@@ -80,40 +75,10 @@ export default () => {
 			mode: 'dark',
 		},
 		components: {
-			MuiCssBaseline: {
-				styleOverrides: {
-					html: {
-						background:
-							process.env.NODE_ENV != 'production'
-								? '#1e1e1e'
-								: 'transparent',
-						'input::-webkit-outer-spin-button, input::-webkit-inner-spin-button':
-							{
-								WebkitAppearance: 'none',
-								margin: 0,
-							},
-					},
-					'*': {
-						'&::-webkit-scrollbar': {
-							width: 6,
-						},
-						'&::-webkit-scrollbar-thumb': {
-							background: `#E5A50280`,
-							transition: 'background ease-in 0.15s',
-						},
-						'&::-webkit-scrollbar-thumb:hover': {
-							background: `#FA580080`,
-						},
-						'&::-webkit-scrollbar-track': {
-							background: 'transparent',
-						},
-					},
-				},
-			},
 			MuiPaper: {
 				styleOverrides: {
 					root: {
-						background: '#0f0f0f',
+                        background: '#0f0f0f',
 					},
 				},
 			},
@@ -141,9 +106,7 @@ export default () => {
 		<StyledEngineProvider injectFirst>
 			<ThemeProvider theme={muiTheme}>
 				<CssBaseline />
-				{!hidden && (
-					<div className="App">{loading ? <Loader /> : display}</div>
-				)}
+				{!hidden && <div className="App">{loading ? <Loader /> : display}</div>}
 			</ThemeProvider>
 		</StyledEngineProvider>
 	);

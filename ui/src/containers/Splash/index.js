@@ -1,122 +1,101 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Fade } from '@mui/material';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
 import { makeStyles } from '@mui/styles';
-
-import Nui from '../../util/Nui';
-import { GetData } from '../../util/NuiEvents';
-
+import { login } from '../../actions/loginActions';
 import logo from '../../assets/imgs/logo_banner.png';
 
 const useStyles = makeStyles((theme) => ({
-	wrapper: {
-		height: 'fit-content',
-		width: 800,
-		position: 'absolute',
-		top: 0,
-		bottom: 0,
-		left: 0,
-		right: 0,
-		margin: 'auto',
-		textAlign: 'center',
-		fontSize: 30,
-		color: theme.palette.text.main,
-		zIndex: 1000,
-		padding: 36,
-		background: theme.palette.secondary.dark,
-		borderLeft: `6px solid ${theme.palette.primary.main}`,
-	},
-	img: {
-		maxWidth: 450,
-		width: '100%',
-		borderBottom: `2px solid ${theme.palette.border.divider}`,
-		margin: 'auto',
-	},
-	innerBody: {
-		paddingTop: 50,
-	},
-	splashHeader: {
-		fontSize: '1.5vw',
-		display: 'block',
-	},
-	splashBranding: {
-		color: theme.palette.primary.main,
-	},
-	splashTip: {
-		fontSize: '0.75vw',
-		animation: '$blinker 1s linear infinite',
-	},
-	splashTipHighlight: {
-		fontWeight: 500,
-		color: theme.palette.primary.main,
-		opacity: 1,
-	},
-	'@keyframes blinker': {
-		'50%': {
-			opacity: 0.3,
-		},
-	},
+  wrapper: {
+    width: 450,
+    height: 'fit-content',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center',
+    zIndex: 1000,
+    padding: '40px 20px',
+  },
+  img: {
+    maxWidth: '80%',
+    marginBottom: 20,
+  },
+  innerBody: {
+    lineHeight: '150%',
+  },
+  splashHeader: {
+    fontSize: '2.5rem',
+    marginBottom: 20,
+    color: theme.palette.primary.main,
+  },
+  splashTip: {
+    fontSize: '1rem',
+    animation: '$blinker 1s linear infinite',
+    color: theme.palette.text.main,
+    fontFamily: "'Oswald', sans-serif !important",
+    fontWeight: 'normal'
+  },
+  splashTipHighlight: {
+    fontWeight: 500,
+    color: theme.palette.primary.main,
+    backgroundColor: '#3b3b3b', 
+    padding: '3px 6px', 
+    borderRadius: '3px',
+    fontFamily: "'Oswald', sans-serif !important",
+    fontWeight: 'bold'
+  },
+  '@keyframes blinker': {
+    '50%': {
+      opacity: 0.3,
+    },
+  },
 }));
 
-export default (props) => {
-	const dispatch = useDispatch();
-	const classes = useStyles();
+const Splash = (props) => {
+  const classes = useStyles();
 
-	const [show, setShow] = useState(true);
+  const handleKeyPress = (e) => {
+    if (e.which === 13 || e.which === 32 || e.which === 1) {
+      props.login();
+    }
+  };
 
-	const onAnimEnd = () => {
-		Nui.send(GetData);
-		dispatch({
-			type: 'LOADING_SHOW',
-			payload: { message: 'Loading Server Data' },
-		});
-	};
+  useEffect(() => {
+    ['click', 'keydown', 'keyup'].forEach(function (e) {
+      window.addEventListener(e, handleKeyPress);
+    });
 
-	const Bleh = (e) => {
-		if (e.which == 1 || e.which == 13 || e.which == 32) {
-			setShow(false);
-		}
-	};
+    return () => {
+      ['click', 'keydown', 'keyup'].forEach(function (e) {
+        window.removeEventListener(e, handleKeyPress);
+      });
+    };
+  }, []);
 
-	useEffect(() => {
-		['click', 'keydown', 'keyup'].forEach(function (e) {
-			window.addEventListener(e, Bleh);
-		});
-
-		// returned function will be called on component unmount
-		return () => {
-			['click', 'keydown', 'keyup'].forEach(function (e) {
-				window.removeEventListener(e, Bleh);
-			});
-		};
-	}, []);
-
-	return (
-		<Fade in={show} onExited={onAnimEnd}>
-			<div className={classes.wrapper}>
-				<img className={classes.img} src={logo} />
-				<div className={classes.innerBody}>
-					<span className={classes.splashHeader}>
-						Welcome To{' '}
-						<span className={classes.splashBranding}>
-							QuantumRP
-						</span>
-					</span>
-					<span className={classes.splashTip}>
-						<span className={classes.splashTipHighlight}>
-							ENTER
-						</span>
-						{' / '}
-						<span className={classes.splashTipHighlight}>
-							SPACE
-						</span>
-						{' / '}
-						<span className={classes.splashTipHighlight}>
-							LEFT MOUSE
-						</span>{' '}
-					</span>
-				</div>
-			</div>
-		</Fade>
-	);
+  return (
+    <div className={classes.wrapper}>
+      <div className={classes.innerBody}>
+        {/* <span className={classes.splashHeader}>
+          Welcome to <span className={classes.splashBranding}></span>
+        </span> */}
+        <img className={classes.img} src={logo} alt="Logo" />
+        <br />
+        <span className={classes.splashTip}>
+          Press{' '}
+          <span className={classes.splashTipHighlight}>ENTER</span>
+          {' / '}
+          <span className={classes.splashTipHighlight}>SPACE</span>
+          {' / '}
+          <span className={classes.splashTipHighlight}>LEFT MOUSE</span> To Select Character
+        </span>
+      </div>
+    </div>
+  );
 };
+
+const mapStateToProps = (state) => ({
+  loading: state.loader.loading,
+  message: state.loader.message,
+});
+
+export default connect(mapStateToProps, { login })(Splash);

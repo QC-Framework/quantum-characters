@@ -1,8 +1,8 @@
 import { APP_RESET, APP_SHOW, APP_HIDE, SET_STATE } from '../../actions/types';
-import { STATE_SPLASH, STATE_SPAWN } from '../../util/States';
+import { STATE_SPLASH } from '../../util/States';
 
 export const initialState = {
-	hidden: process.env.NODE_ENV == 'production',
+	hidden: true,
 	state: STATE_SPLASH,
 };
 

@@ -1,35 +1,41 @@
 FETCH = {
-	AllCharacters = function(self)
-		return ONLINE_CHARACTERS
-	end,
-	CharacterSource = function(self, source)
-		if source then
-			return ONLINE_CHARACTERS[source]
-		end
-	end,
 	CharacterData = function(self, key, value)
-		for source, char in pairs(ONLINE_CHARACTERS) do
-			if char and char:GetData(key) == value then
-				return char
+		for _, v in ipairs(GetPlayers()) do
+			local plyr = Fetch:Source(tonumber(v))
+			if plyr ~= nil then
+				local char = plyr:GetData('Character')
+				if char ~= nil then
+					local data = char:GetData(key)
+					if data ~= nil and data == value then
+						return plyr
+					end
+				end
 			end
 		end
+		return nil
 	end,
 	ID = function(self, value)
-		local source = _pleaseFuckingWorkID[value]
-		if source then
-			return Fetch:CharacterSource(tonumber(source))
-		end
+		return self:CharacterData('ID', value)
 	end,
 	SID = function(self, value)
-		local source = _pleaseFuckingWorkSID[value]
-		if source then
-			return Fetch:CharacterSource(tonumber(source))
+		return self:CharacterData('SID', value)
+	end,
+	Next = function(self, prev)
+		local retNext = false
+		for _, v in pairs(Fetch:All()) do
+			if prev == 0 or retNext then
+				return v
+			elseif prev == v:GetData('Source') then
+				retNext = true
+			end
 		end
+
+		return nil
 	end,
 	CountCharacters = function(self)
 		local c = 0
-		for k, v in pairs(ONLINE_CHARACTERS) do
-			if v ~= nil then
+		for _, v in pairs(Fetch:All()) do
+			if v:GetData('Character') ~= nil then
 				c = c + 1
 			end
 		end
@@ -38,7 +44,7 @@ FETCH = {
 	GetOfflineData = function(self, stateId, key)
 		local p = promise.new()
 		Database.Game:findOne({
-			collection = "characters",
+			collection = 'characters',
 			query = {
 				SID = stateId,
 			},
@@ -57,8 +63,8 @@ FETCH = {
 	end,
 }
 
-AddEventHandler("Proxy:Shared:ExtendReady", function(component)
-	if component == "Fetch" then
-		exports["quantum-base"]:ExtendComponent(component, FETCH)
+AddEventHandler('Proxy:Shared:ExtendReady', function(component)
+	if component == 'Fetch' then
+		exports['quantum-base']:ExtendComponent(component, FETCH)
 	end
 end)

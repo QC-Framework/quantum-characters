@@ -1,174 +1,127 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button, ButtonGroup } from '@mui/material';
+import { connect } from 'react-redux';
+import { Button, ButtonGroup, List } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-
-import Nui from '../../util/Nui';
-import { Motd } from '../../components';
-import logo from '../../assets/imgs/logo_banner.png';
-
-import SpawnButton from './components/SpawnButton';
-import { STATE_CHARACTERS } from '../../util/States';
-import { PlayCharacter } from '../../util/NuiEvents';
+import SpawnButton from '../../components/SpawnButton';
+import { spawnToWorld, deselectCharacter } from '../../actions/characterActions';
 
 const useStyles = makeStyles((theme) => ({
-	canvas: {
-		height: '100vh',
-		width: '100vw',
-		position: 'relative',
-	},
-	logo: {
-		width: 300,
-		height: 169,
-		position: 'absolute',
-		right: 0,
-		top: 0,
-	},
-	spawnContainer: {
+	wrapper: {
+		width: 450,
+		height: 'fit-content',
+		maxHeight: '80%',
 		position: 'absolute',
 		top: 0,
 		bottom: 0,
-		left: 0,
+		right: '5%',
 		margin: 'auto',
+		padding: 20,
+		background: theme.palette.secondary.dark,
+		display: 'flex',
+		flexDirection: 'column',
+		overflow: 'hidden',
+	},
+	bodyWrapper: {
+		textAlign: 'center',
+		width: '100%',
+		flexGrow: 1,
+		overflow: 'hidden',
+		display: 'flex',
+		flexDirection: 'column',
+	},
+	spawnList: {
+		padding: 0,
+		overflowY: 'auto',
+		overflowX: 'hidden',
+		flexGrow: 1,
+		'&::-webkit-scrollbar': {
+			width: 6,
+		},
+		'&::-webkit-scrollbar-thumb': {
+			background: '#131317',
+		},
+		'&::-webkit-scrollbar-thumb:hover': {
+			background: theme.palette.primary.main,
+		},
+		'&::-webkit-scrollbar-track': {
+			background: theme.palette.secondary.main,
+		},
+	},
+	header: {
+		borderLeft: `1px solid ${theme.palette.secondary.main}`,
+		padding: 15,
+		background: theme.palette.secondary.main,
+		color: theme.palette.text.main,
+		whiteSpace: 'nowrap',
+		textOverflow: 'ellipsis',
+		fontFamily: "'Oswald', sans-serif !important",
+		fontWeight: 'bold',
+	},
+	positive: {
+		border: `2px solid ${theme.palette.success.dark}`,
+		background: theme.palette.success.main,
+		color: theme.palette.text.dark,
+		fontSize: 20,
+		padding: 10,
+		width: 105,
+		textAlign: 'center',
+		transition: 'filter ease-in 0.15s',
+		'&:hover': {
+			borderColor: `${theme.palette.success.dark} !important`,
+			boxShadow: 'none',
+			background: theme.palette.success.main,
+			filter: 'brightness(0.7)',
+		},
+	},
+	negative: {
+		border: `2px solid ${theme.palette.error.dark}`,
+		background: theme.palette.error.main,
+		color: theme.palette.text.main,
+		fontSize: 20,
+		padding: 10,
+		width: 105,
+		textAlign: 'center',
+		transition: 'filter ease-in 0.15s',
+		'&:hover': {
+			background: theme.palette.error.main,
+			filter: 'brightness(0.7)',
+		},
+	},
+	actions: {
+		position: 'absolute',
 		width: 'fit-content',
 		height: 'fit-content',
-		gap: 4,
-		maxWidth: 310,
-		maxHeight: 600,
-		height: '100%',
-		overflow: 'auto',
-	},
-	spawnInfo: {
-		height: 'fit-content',
-		width: 300,
-		position: 'absolute',
-		right: 0,
+		bottom: '5%',
 		left: 0,
-		bottom: 40,
+		right: 0,
 		margin: 'auto',
-		borderLeft: `4px solid ${theme.palette.primary.main}`,
-	},
-	charInfo: {
-		background: `${theme.palette.secondary.dark}80`,
-		padding: 10,
-	},
-	button: {
-		borderRadius: 0,
-	},
-	label: {
-		fontSize: 18,
-	},
-	data: {
-		fontSize: 22,
-		color: theme.palette.primary.dark,
-		fontWeight: 'bold',
 	},
 }));
 
-export default (props) => {
-	const classes = useStyles();
-	const dispatch = useDispatch();
 
-	const motd = useSelector((state) => state.characters.motd);
-	const spawns = useSelector((state) => state.spawn.spawns);
-	const selected = useSelector((state) => state.spawn.selected);
-	const selectedChar = useSelector((state) => state.characters.selected);
+const Spawn = (props) => {
+	const classes = useStyles();
 
 	const onSpawn = () => {
-		Nui.send(PlayCharacter, {
-			spawn: selected,
-			character: selectedChar,
-		});
-		dispatch({
-			type: 'LOADING_SHOW',
-			payload: { message: 'Spawning' },
-		});
-		dispatch({
-			type: 'UPDATE_PLAYED',
-		});
-		dispatch({ type: 'DESELECT_CHARACTER' });
-		dispatch({ type: 'DESELECT_SPAWN' });
+		props.spawnToWorld(props.selected, props.selectedChar);
 	};
 
 	const goBack = () => {
-		dispatch({ type: 'DESELECT_CHARACTER' });
-		dispatch({ type: 'DESELECT_SPAWN' });
-		dispatch({
-			type: 'SET_STATE',
-			payload: { state: STATE_CHARACTERS },
-		});
+		props.deselectCharacter();
 	};
 
 	return (
-		<div className={classes.canvas}>
-			{Boolean(motd) && <Motd message={motd} />}
-			<img className={classes.logo} src={logo} />
-			<div className={classes.spawnContainer}>
-				{spawns.map((spawn, i) => {
-					return (
-						<SpawnButton key={i} spawn={spawn} onPlay={onSpawn} />
-					);
-				})}
-			</div>
-			<div className={classes.spawnInfo}>
-				<div className={classes.charInfo}>
-					<div className={classes.label}>Spawning As</div>
-					<div className={classes.data}>
-						{selectedChar.First} {selectedChar.Last}
-					</div>
-					<div className={classes.label}>At</div>
-					{Boolean(selected) ? (
-						<div className={classes.data}>{selected.label}</div>
-					) : (
-						<div className={classes.data}>(No Spawn Selected)</div>
-					)}
-				</div>
-				<ButtonGroup fullWidth className={classes.buttons}>
-					<Button
-						fullWidth
-						variant="contained"
-						color="error"
-						onClick={goBack}
-						className={classes.button}
-					>
-						Cancel
-					</Button>
-					{Boolean(selected) && (
-						<Button
-							fullWidth
-							variant="contained"
-							color="success"
-							onClick={onSpawn}
-							className={classes.button}
-						>
-							Play
-						</Button>
-					)}
-				</ButtonGroup>
-			</div>
-		</div>
-	);
-
-	return (
 		<>
-			<div className={classes.container}>
-				<div className={classes.wrapper}>
-					<div className={classes.innerWrapper}>
-						<div className={classes.header}>
-							<span>Select Your Spawn</span>
-						</div>
-						<div className={classes.body}>
-							{props.spawns.map((spawn, i) => {
-								return (
-									<SpawnButton
-										key={i}
-										type="button"
-										spawn={spawn}
-									/>
-								);
-							})}
-						</div>
+			<div className={classes.wrapper}>
+				<div className={classes.bodyWrapper}>
+					<div className={classes.header}>
+						<span>Select Your Spawn</span>
 					</div>
+					<List className={classes.spawnList}>
+						{props.spawns.map((spawn, i) => (
+							<SpawnButton key={i} type="button" spawn={spawn} />
+						))}
+					</List>
 				</div>
 			</div>
 			<div className={classes.actions}>
@@ -186,3 +139,14 @@ export default (props) => {
 		</>
 	);
 };
+
+const mapStateToProps = (state) => ({
+	spawns: state.spawn.spawns,
+	selected: state.spawn.selected,
+	selectedChar: state.characters.selected,
+});
+
+export default connect(mapStateToProps, {
+	deselectCharacter,
+	spawnToWorld,
+})(Spawn);

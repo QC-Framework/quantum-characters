@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 
-export default ({ children }) => {
-	const dispatch = useDispatch();
-
+const WindowListener = (props) => {
 	const handleEvent = (event) => {
 		if (!event.isTrusted) {
 			console.log('Untrusted Event Bruv');
 			return;
 		}
 
+		const { dispatch } = props;
 		const { type, data } = event.data;
 		if (type != null) dispatch({ type, payload: { ...data } });
 	};
@@ -23,5 +22,7 @@ export default ({ children }) => {
 		};
 	}, []);
 
-	return React.Children.only(children);
+	return React.Children.only(props.children);
 };
+
+export default connect(null, null)(WindowListener);

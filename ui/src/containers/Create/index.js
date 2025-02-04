@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { TextField, FormControl, MenuItem, Autocomplete } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
@@ -8,14 +8,13 @@ import { getCodeList } from 'country-list';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import moment from 'moment';
 
-import Nui from '../../util/Nui';
-
+import { SET_STATE } from '../../actions/types';
+import { createCharacter } from '../../actions/characterActions';
 import { STATE_CHARACTERS } from '../../util/States';
-import { CreateCharacter } from '../../util/NuiEvents';
 
 const useStyles = makeStyles((theme) => ({
 	wrapper: {
-		width: 650,
+		width: '50%',
 		height: 650,
 		position: 'absolute',
 		top: 0,
@@ -24,17 +23,9 @@ const useStyles = makeStyles((theme) => ({
 		left: 0,
 		margin: 'auto',
 		background: theme.palette.secondary.dark,
-		borderLeft: `4px solid ${theme.palette.primary.main}`,
 	},
 	createForm: {
 		margin: 25,
-	},
-	title: {
-		textAlign: 'center',
-		borderBottom: `2px solid ${theme.palette.border.divider}`,
-		fontSize: 26,
-		paddingBottom: 15,
-		marginBottom: 15,
 	},
 	button: {
 		fontSize: 14,
@@ -122,9 +113,8 @@ date.setFullYear(date.getFullYear() - 18);
 const date2 = new Date();
 date2.setFullYear(date2.getFullYear() - 100);
 
-export default () => {
+const Create = (props) => {
 	const classes = useStyles();
-	const dispatch = useDispatch();
 
 	const countries = Object.keys(countriesOrigin).map((k) => {
 		let c = countriesOrigin[k];
@@ -137,7 +127,7 @@ export default () => {
 	const [state, setState] = useState({
 		first: '',
 		last: '',
-		dob: moment().subtract(18, 'years'),
+		dob: new Date('1990-12-31T23:59:59'),
 		gender: 0,
 		bio: '',
 		origin: null,
@@ -165,23 +155,19 @@ export default () => {
 			first: state.first,
 			last: state.last,
 			gender: state.gender,
-			dob: state.dob,
+			dob: moment(state.dob).unix(),
 			lastPlayed: -1,
 			origin: state.origin,
 		};
-
-		Nui.send(CreateCharacter, data);
-		dispatch({
-			type: 'LOADING_SHOW',
-			payload: { message: 'Creating Character' },
-		});
+		props.createCharacter(data, props.dispatch);
 	};
 
 	return (
 		<LocalizationProvider dateAdapter={AdapterMoment}>
 			<div className={classes.wrapper}>
 				<div className={classes.createForm}>
-					<div className={classes.title}>Create Character</div>
+					<h1 style={{ marginLeft: 15 }}>Create Character</h1>
+					<hr style={{ marginBottom: 20 }} />
 					<form
 						autoComplete="off"
 						id="createForm"
@@ -283,11 +269,6 @@ export default () => {
 								renderInput={(params) => (
 									<TextField fullWidth {...params} />
 								)}
-								slotProps={{
-									textField: {
-										helperText: 'MM/DD/YYYY',
-									},
-								}}
 							/>
 						</FormControl>
 						<FormControl className={classes.formControl2}>
@@ -313,8 +294,8 @@ export default () => {
 						type="button"
 						className={`${classes.button} ${classes.negative}`}
 						onClick={() => {
-							dispatch({
-								type: 'SET_STATE',
+							props.dispatch({
+								type: SET_STATE,
 								payload: { state: STATE_CHARACTERS },
 							});
 						}}
@@ -333,3 +314,10 @@ export default () => {
 		</LocalizationProvider>
 	);
 };
+
+const mapDispatchToProps = (dispatch) => ({
+	dispatch,
+	createCharacter,
+});
+
+export default connect(null, mapDispatchToProps)(Create);

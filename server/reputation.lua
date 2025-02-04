@@ -1,49 +1,32 @@
-AddEventHandler("Reputation:Shared:DependencyUpdate", RepComponents)
+AddEventHandler('Reputation:Shared:DependencyUpdate', RepComponents)
 function RepComponents()
-	Fetch = exports["quantum-base"]:FetchComponent("Fetch")
-	Callbacks = exports["quantum-base"]:FetchComponent("Callbacks")
-	Database = exports["quantum-base"]:FetchComponent("Database")
-	Middleware = exports["quantum-base"]:FetchComponent("Middleware")
-	Logger = exports["quantum-base"]:FetchComponent("Logger")
-	Database = exports["quantum-base"]:FetchComponent("Database")
-	Reputation = exports["quantum-base"]:FetchComponent("Reputation")
-	Inventory = exports["quantum-base"]:FetchComponent("Inventory")
+	Fetch = exports['quantum-base']:FetchComponent('Fetch')
+	Callbacks = exports['quantum-base']:FetchComponent('Callbacks')
+	Database = exports['quantum-base']:FetchComponent('Database')
+	Middleware = exports['quantum-base']:FetchComponent('Middleware')
+	Logger = exports['quantum-base']:FetchComponent('Logger')
+	Database = exports['quantum-base']:FetchComponent('Database')
 end
 
-AddEventHandler("Core:Shared:Ready", function()
-	exports["quantum-base"]:RequestDependencies("Reputation", {
-		"Fetch",
-		"Callbacks",
-		"Database",
-		"Middleware",
-		"Logger",
-		"Database",
-		"Reputation",
-		"Inventory",
+AddEventHandler('Core:Shared:Ready', function()
+	exports['quantum-base']:RequestDependencies('Reputation', {
+		'Fetch',
+		'Callbacks',
+		'Database',
+		'Middleware',
+		'Logger',
+		'Database',
 	}, function(error)
 		if #error > 0 then
 			return
 		end -- Do something to handle if not all dependencies loaded
 		RepComponents()
-		RepItems()
 	end)
 end)
 
-function RepItems()
-	Inventory.Items:RegisterUse("rep_voucher", "RandomItems", function(source, item)
-		local char = Fetch:CharacterSource(source)
-		if item.MetaData.Reputation and ((item.MetaData.Amount and tonumber(item.MetaData.Amount) or 0) > 0) then
-			Reputation.Modify:Add(source, item.MetaData.Reputation, item.MetaData.Amount)
-			Inventory.Items:RemoveSlot(item.Owner, item.Name, 1, item.Slot, 1)
-		else
-			Execute:Client(source, "Notification", "Error", "Invalid Voucher")
-		end
-	end)
-end
-
 _REP = {
 	Create = function(self, id, label, levels, hidden)
-		GlobalState[string.format("Rep:%s", id)] = {
+		GlobalState[string.format('Rep:%s', id)] = {
 			id = id,
 			label = label,
 			levels = levels,
@@ -51,13 +34,13 @@ _REP = {
 		}
 	end,
 	GetLevel = function(self, source, id)
-		if GlobalState[string.format("Rep:%s", id)] ~= nil then
-			local char = Fetch:CharacterSource(source)
+		if GlobalState[string.format('Rep:%s', id)] ~= nil then
+			local char = Fetch:Source(source):GetData('Character')
 			if char ~= nil then
-				local reps = char:GetData("Reputations") or {}
+				local reps = char:GetData('Reputations') or {}
                 local level = 0
 				if reps[id] ~= nil then
-                    for k, v in ipairs(GlobalState[string.format("Rep:%s", id)].levels) do
+                    for k, v in ipairs(GlobalState[string.format('Rep:%s', id)].levels) do
                         if v.value <= reps[id] then
                             level = k
                         end
@@ -73,21 +56,14 @@ _REP = {
 			return nil
 		end
 	end,
-	HasLevel = function(self, source, id, level)
-		if GlobalState[string.format("Rep:%s", id)] ~= nil then
-			return _REP:GetLevel(source, id) >= level
-		else
-			return false
-		end
-	end,
 	View = function(self, source)
-		local char = Fetch:CharacterSource(source)
+		local char = Fetch:Source(source):GetData('Character')
 		if char ~= nil then
-			local reps = char:GetData("Reputations") or {}
+			local reps = char:GetData('Reputations') or {}
 			local viewingData = {}
 
 			for id, val in pairs(reps) do
-				local repData = GlobalState[string.format("Rep:%s", id)]
+				local repData = GlobalState[string.format('Rep:%s', id)]
 				if id and val and repData and not repData.hidden then
 					local repCurrent = {
 						level = 0,
@@ -137,13 +113,13 @@ _REP = {
 		end
 	end,
 	ViewList = function(self, source, list)
-		local char = Fetch:CharacterSource(source)
+		local char = Fetch:Source(source):GetData('Character')
 		if char ~= nil then
-			local reps = char:GetData("Reputations") or {}
+			local reps = char:GetData('Reputations') or {}
 			local viewingData = {}
 
 			for id, val in pairs(reps) do
-				local repData = GlobalState[string.format("Rep:%s", id)]
+				local repData = GlobalState[string.format('Rep:%s', id)]
 				if id and val and repData and list[id] then
 					local repCurrent = {
 						level = 0,
@@ -194,11 +170,11 @@ _REP = {
 	end,
 	Modify = {
 		Add = function(self, source, id, amount)
-			if GlobalState[string.format("Rep:%s", id)] ~= nil then
-                local rep = GlobalState[string.format("Rep:%s", id)]
-				local char = Fetch:CharacterSource(source)
+			if GlobalState[string.format('Rep:%s', id)] ~= nil then
+                local rep = GlobalState[string.format('Rep:%s', id)]
+				local char = Fetch:Source(source):GetData('Character')
 				if char ~= nil then
-					local reps = char:GetData("Reputations") or {}
+					local reps = char:GetData('Reputations') or {}
 					if reps[id] ~= nil then
 						if reps[id] + math.abs(amount) <= rep.levels[#rep.levels].value then
 							reps[id] = reps[id] + math.abs(amount)
@@ -212,29 +188,32 @@ _REP = {
 							reps[id] = rep.levels[#rep.levels].value
 						end
 					end
-					char:SetData("Reputations", reps)
+					char:SetData('Reputations', reps)
 				end
 			end
 		end,
 		Remove = function(self, source, id, amount)
-			if GlobalState[string.format("Rep:%s", id)] ~= nil then
-                local rep = GlobalState[string.format("Rep:%s", id)]
+			if GlobalState[string.format('Rep:%s', id)] ~= nil then
+                local rep = GlobalState[string.format('Rep:%s', id)]
 
-				local char = Fetch:CharacterSource(source)
-				if char ~= nil then
-					local reps = char:GetData("Reputations") or {}
-					if reps[id] ~= nil and (reps[id] - math.abs(amount) > 0) then
-						reps[id] = reps[id] - math.abs(amount)
-					else
-						reps[id] = 0
+				local plyr = Fetch:Source(source)
+				if plyr ~= nil then
+					local char = plyr:GetData('Character')
+					if char ~= nil then
+						local reps = char:GetData('Reputations') or {}
+						if reps[id] ~= nil and (reps[id] - math.abs(amount) > 0) then
+							reps[id] = reps[id] - math.abs(amount)
+						else
+							reps[id] = 0
+						end
+						char:SetData('Reputations', reps)
 					end
-					char:SetData("Reputations", reps)
 				end
 			end
 		end,
 	},
 }
 
-AddEventHandler("Proxy:Shared:RegisterReady", function()
-	exports["quantum-base"]:RegisterComponent("Reputation", _REP)
+AddEventHandler('Proxy:Shared:RegisterReady', function()
+	exports['quantum-base']:RegisterComponent('Reputation', _REP)
 end)

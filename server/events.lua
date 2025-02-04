@@ -1,12 +1,15 @@
 RegisterServerEvent('Characters:Server:Spawning', function()
-    Middleware:TriggerEvent("Characters:Spawning", source)
+    Middleware:TriggerEvent('Characters:Spawning', source)
 end)
 
 RegisterServerEvent('Ped:LeaveCreator', function()
-    local char = Fetch:CharacterSource(source)
-    if char ~= nil then
-        if char:GetData("New") then
-            char:SetData("New", false)
+    local plyr = Fetch:Source(source)
+    if plyr ~= nil then
+        local char = plyr:GetData('Character')
+        if char ~= nil then
+            if char:GetData('New') then
+                char:SetData('New', false)
+            end
         end
     end
 end)
